@@ -1,22 +1,38 @@
+import { Result } from 'postcss';
 import React from 'react';
+import { useContext } from 'react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { UserContext } from '../../provider/AuthProvider';
 
 const Register = () => {
+    const [error, setError] = useState('')
+    const { user, createUser } = useContext(UserContext)
+    const [show, setShow]=useState(true)
 
-    const [error,setError]=useState('')
-
-    const handleSignUp=event=>{
+    const handleSignUp = event => {
         setError('')
         event.preventDefault()
-        const form=event.target;
-        const email=form.email;
-        const password=form.password;
-        const confirm=form.confirm;
+        const form = event.target;
+        const email = form.email.value;
+        const password = form.password.value;
+        const confirm = form.confirm.value;
 
-        if (password !==confirm) {
+        if (password !== confirm) {
             setError('Password does not match')
         }
+        console.log(email, password);
+
+        createUser(email, password)
+            .then(result => {
+                const loggedUser = result.user;
+                form.reset()
+                console.log(loggedUser);
+            })
+            .catch(error => {
+                console.log(error.message)
+                setError(error.message)
+            })
 
     }
 
@@ -42,15 +58,19 @@ const Register = () => {
                                 <label className="label">
                                     <span className="label-text">Password</span>
                                 </label>
-                                <input type="text" placeholder="password" name='password' required className="input input-bordered" />
+                                <input type={show ? "password" : "text"}  placeholder="password" name='password' required className="input input-bordered" />
                             </div>
                             <div className="form-control">
                                 <label className="label">
                                     <span className="label-text">Confirm Password</span>
                                 </label>
-                                <input type="text" placeholder="confirm password" name='confirm' required className="input input-bordered" />
-                                
+                                <input type={show ? "password" : "text"}  placeholder="confirm password" name='confirm' required className="input input-bordered" />
+
                             </div>
+
+                            {
+                                show ? <small onClick={() => { setShow(false) }}>Show password</small> : <small onClick={() => { setShow(true) }}>Hide password</small>
+                            }
                             <div className="form-control mt-6">
                                 <button className="btn btn-primary">Register</button>
                             </div>
